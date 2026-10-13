@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tebak Kata AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="bg-blob blob-1"></div>
+  <div class="bg-blob blob-2"></div>
+
+  <!-- ================= LAYAR AWAL ================= -->
+  <section id="screen-start" class="screen active">
+    <div class="card start-card">
+      <div class="logo">🧩</div>
+      <h1>Tebak Kata <span class="accent">AI</span></h1>
+      <p class="subtitle">
+        AI akan memikirkan sebuah kata rahasia. Tebak kata itu dengan bantuan clue
+        dan berdiskusi dengan AI. Semakin sedikit bertanya, semakin tinggi nilaimu!
+      </p>
+
+      <label class="field-label" for="player-name">Nama kamu</label>
+      <input id="player-name" class="text-input" type="text" maxlength="20" placeholder="Masukkan nama..." />
+
+      <p class="field-label">Pilih tema</p>
+      <div class="theme-grid" id="theme-grid">
+        <button class="theme-card" data-theme="otomotif">
+          <span class="theme-icon">🚗</span>
+          <span class="theme-title">Otomotif</span>
+          <span class="theme-desc">Mesin, komponen & dunia kendaraan</span>
+        </button>
+        <button class="theme-card" data-theme="indonesia">
+          <span class="theme-icon">🇮🇩</span>
+          <span class="theme-title">Umum Indonesia</span>
+          <span class="theme-desc">Budaya, kuliner & tempat di nusantara</span>
+        </button>
+        <button class="theme-card" data-theme="internasional">
+          <span class="theme-icon">🌍</span>
+          <span class="theme-title">Umum Internasional</span>
+          <span class="theme-desc">Pengetahuan umum dari seluruh dunia</span>
+        </button>
+        <button class="theme-card" data-theme="campuran">
+          <span class="theme-icon">🎲</span>
+          <span class="theme-title">Campuran</span>
+          <span class="theme-desc">Acak dari semua tema</span>
+        </button>
+      </div>
+
+      <button id="btn-start" class="btn btn-primary btn-block" disabled>Mulai Bermain</button>
+
+      <div class="rules">
+        <h3>Aturan nilai</h3>
+        <ul>
+          <li>Nilai awal setiap kata: <b>100%</b></li>
+          <li>Setiap pertanyaan ke AI: <b>-10%</b></li>
+          <li>Setiap tebakan salah: <b>-5%</b></li>
+          <li>Minta buka 1 huruf: <b>-15%</b></li>
+          <li>Nilai minimum jika berhasil menjawab: <b>1%</b></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LAYAR PERMAINAN ================= -->
+  <section id="screen-game" class="screen">
+    <header class="game-header card">
+      <button id="btn-back" class="btn btn-ghost" title="Kembali ke menu">← Menu</button>
+      <div class="header-info">
+        <span class="badge" id="theme-badge">Tema</span>
+        <span class="round-info">Ronde <b id="round-number">1</b> · <span id="player-label">Pemain</span></span>
+      </div>
+      <div class="total-score" title="Rata-rata nilai seluruh ronde">
+        Rata-rata <b id="avg-score">-</b>
+      </div>
+    </header>
+
+    <main class="game-layout">
+      <!-- Kolom kiri: jawaban + clue -->
+      <div class="game-main">
+        <div class="card answer-card">
+          <div class="score-row">
+            <div>
+              <p class="label-muted">Nilai kata ini</p>
+              <p class="score-value"><span id="score-value">100</span>%</p>
+            </div>
+            <div class="stats">
+              <span>💬 Pertanyaan: <b id="stat-questions">0</b></span>
+              <span>❌ Salah: <b id="stat-wrong">0</b></span>
+              <span>🔓 Huruf dibuka: <b id="stat-reveal">0</b></span>
+            </div>
+          </div>
+          <div class="score-bar"><div id="score-bar-fill" class="score-bar-fill"></div></div>
+
+          <p class="label-muted center">Isi kotak huruf di bawah ini</p>
+          <div id="letter-boxes" class="letter-boxes" aria-label="Kotak jawaban"></div>
+          <p id="answer-feedback" class="answer-feedback"></p>
+
+          <div class="answer-actions">
+            <button id="btn-reveal" class="btn btn-outline">🔓 Buka 1 Huruf</button>
+            <button id="btn-giveup" class="btn btn-danger-outline">🏳️ Menyerah</button>
+            <button id="btn-submit" class="btn btn-primary">✔ Jawab</button>
+          </div>
+        </div>
+
+        <div class="card clue-card">
+          <div class="clue-header">
+            <span class="clue-icon">💡</span>
+            <h2>Clue dari AI</h2>
+          </div>
+          <div id="clue-content" class="clue-content">
+            <div class="skeleton"></div>
+            <div class="skeleton short"></div>
+          </div>
+          <div class="clue-meta">
+            <span>Kategori: <b id="clue-category">-</b></span>
+            <span>Jumlah huruf: <b id="clue-length">-</b></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kolom kanan: chat diskusi -->
+      <aside class="card chat-card">
+        <div class="chat-header">
+          <div class="avatar ai">🤖</div>
+          <div>
+            <h2>Teman Diskusi AI</h2>
+            <p class="label-muted">Setiap pertanyaan mengurangi nilai 10%</p>
+          </div>
+        </div>
+
+        <div id="chat-messages" class="chat-messages"></div>
+
+        <div class="quick-questions" id="quick-questions">
+          <button class="chip">Huruf pertamanya apa?</button>
+          <button class="chip">Huruf terakhirnya apa?</button>
+          <button class="chip">Beri petunjuk lain</button>
+          <button class="chip">Apa fungsinya / kegunaannya?</button>
+        </div>
+
+        <form id="chat-form" class="chat-form">
+          <input id="chat-input" class="text-input" type="text" placeholder="Tanya sesuatu ke AI..." autocomplete="off" />
+          <button type="submit" class="btn btn-primary" id="chat-send">Kirim</button>
+        </form>
+      </aside>
+    </main>
+  </section>
+
+  <!-- ================= MODAL HASIL ================= -->
+  <div id="result-modal" class="modal hidden">
+    <div class="modal-content card">
+      <div id="result-icon" class="result-icon">🎉</div>
+      <h2 id="result-title">Benar!</h2>
+      <p id="result-text" class="label-muted"></p>
+      <div class="result-word" id="result-word"></div>
+      <p id="result-ai" class="result-ai"></p>
+      <div class="result-score">
+        <p class="label-muted">Nilai kamu</p>
+        <p class="score-value big"><span id="result-score">100</span>%</p>
+      </div>
+      <div class="modal-actions">
+        <button id="btn-change-theme" class="btn btn-outline">Ganti Tema</button>
+        <button id="btn-next" class="btn btn-primary">Kata Berikutnya →</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

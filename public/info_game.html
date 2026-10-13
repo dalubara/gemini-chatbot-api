@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Info Game - Tebak Kata AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary: #7c5cff;
+      --primary-2: #00b8e6;
+      --dark: #15162b;
+      --text: #2b2d42;
+      --muted: #6b6f8a;
+      --line: #e6e7f2;
+      --soft: #f5f4ff;
+      --success: #12b981;
+      --warning: #f59e0b;
+      --danger: #ef4467;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Poppins', system-ui, sans-serif;
+      color: var(--text);
+      background: #eceef7;
+      line-height: 1.55;
+      font-size: 14px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .page {
+      max-width: 900px;
+      margin: 28px auto;
+      background: #fff;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 10px 40px rgba(20, 20, 60, 0.12);
+    }
+
+    /* ---------- Hero ---------- */
+    .hero {
+      position: relative;
+      padding: 40px 44px 34px;
+      color: #fff;
+      background: linear-gradient(135deg, #1b1340 0%, #2a1f6b 45%, #0a5a73 100%);
+      overflow: hidden;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      width: 320px; height: 320px;
+      right: -80px; top: -120px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 212, 255, 0.45), transparent 70%);
+    }
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      position: relative;
+      z-index: 1;
+    }
+    .hero h1 { font-size: 2.3rem; font-weight: 800; line-height: 1.15; }
+    .hero h1 span {
+      background: linear-gradient(90deg, #a48bff, #4fe3ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .hero p { color: #cfd2f5; margin-top: 8px; max-width: 560px; }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; position: relative; z-index: 1; }
+    .tag {
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+
+    .btn-pdf {
+      flex-shrink: 0;
+      border: none;
+      cursor: pointer;
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-family: inherit;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(90deg, var(--primary), var(--primary-2));
+      box-shadow: 0 6px 18px rgba(124, 92, 255, 0.4);
+    }
+    .btn-pdf:hover { transform: translateY(-2px); }
+
+    /* ---------- Content ---------- */
+    .content { padding: 30px 44px 40px; }
+
+    section { margin-bottom: 28px; break-inside: avoid; page-break-inside: avoid; }
+
+    h2 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 12px;
+    }
+    h2 .num {
+      display: grid;
+      place-items: center;
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      color: #fff;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    }
+
+    ul.list { list-style: none; display: grid; gap: 6px; }
+    ul.list li { padding-left: 22px; position: relative; }
+    ul.list li::before {
+      content: '';
+      position: absolute;
+      left: 4px; top: 9px;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    }
+
+    code {
+      font-family: Consolas, 'Courier New', monospace;
+      font-size: 0.85em;
+      padding: 1px 6px;
+      border-radius: 6px;
+      background: var(--soft);
+      color: #5a3fe0;
+    }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px 16px;
+      background: #fff;
+    }
+    .card h3 { font-size: 0.92rem; margin-bottom: 6px; color: var(--dark); }
+    .card p, .card li { font-size: 0.85rem; }
+    .card .icon { font-size: 1.4rem; margin-bottom: 4px; }
+
+    /* Screenshot */
+    figure {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--soft);
+    }
+    figure img { width: 100%; display: block; }
+    figcaption { padding: 8px 12px; font-size: 0.78rem; color: var(--muted); }
+
+    /* Flow API */
+    .flow {
+      display: flex;
+      align-items: stretch;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .flow .step {
+      flex: 1;
+      text-align: center;
+      padding: 12px 8px;
+      border-radius: 12px;
+      background: var(--soft);
+      border: 1px solid #e0dcff;
+      font-size: 0.8rem;
+    }
+    .flow .step b { display: block; font-size: 0.88rem; color: var(--dark); }
+    .flow .arrow { align-self: center; color: var(--primary); font-weight: 800; }
+
+    pre {
+      font-family: Consolas, 'Courier New', monospace;
+      font-size: 0.78rem;
+      line-height: 1.5;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: var(--dark);
+      color: #d6d9ff;
+      white-space: pre-wrap;
+    }
+
+    /* Temperature */
+    .temp { text-align: center; }
+    .temp .value { font-size: 1.8rem; font-weight: 800; color: var(--primary); }
+    .bar { height: 8px; border-radius: 999px; background: var(--line); margin: 8px 0; overflow: hidden; }
+    .bar div { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--primary-2), var(--primary)); }
+
+    /* Alur */
+    .steps { counter-reset: s; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .steps div {
+      counter-increment: s;
+      position: relative;
+      padding: 14px 12px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      font-size: 0.82rem;
+    }
+    .steps div::before {
+      content: counter(s);
+      display: inline-grid;
+      place-items: center;
+      width: 22px; height: 22px;
+      margin-bottom: 6px;
+      border-radius: 50%;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--dark);
+    }
+    .steps b { display: block; color: var(--dark); }
+
+    /* Tabel */
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--line); }
+    th { background: var(--soft); color: var(--dark); font-weight: 600; }
+    td.minus { font-weight: 700; color: var(--danger); }
+    td.zero { font-weight: 700; color: var(--success); }
+
+    .note {
+      margin-top: 10px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      background: #fff8e6;
+      border-left: 4px solid var(--warning);
+    }
+
+    footer {
+      padding: 16px 44px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    @media (max-width: 720px) {
+      .hero, .content, footer { padding-left: 20px; padding-right: 20px; }
+      .grid-2, .grid-3, .steps { grid-template-columns: 1fr; }
+      .flow { flex-direction: column; }
+      .flow .arrow { transform: rotate(90deg); }
+      .hero-top { flex-direction: column; }
+    }
+
+    /* ---------- Print / PDF ---------- */
+    @page { size: A4; margin: 12mm; }
+    @media print {
+      body { background: #fff; font-size: 12px; }
+      .page { margin: 0; max-width: none; box-shadow: none; border-radius: 0; }
+      .btn-pdf { display: none; }
+      .hero { padding: 28px 30px 24px; }
+      .content { padding: 20px 30px 10px; }
+      footer { padding: 12px 30px; }
+      section { margin-bottom: 18px; }
+      .page-break { break-before: page; page-break-before: always; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- ================= HERO ================= -->
+    <header class="hero">
+      <div class="hero-top">
+        <div>
+          <h1>🧩 Tebak Kata <span>AI</span></h1>
+          <p>Mini game tebak kata berbahasa Indonesia. Kata rahasia, clue, dan teman diskusi semuanya dihasilkan secara langsung oleh Google Gemini.</p>
+        </div>
+        <button class="btn-pdf" onclick="window.print()">⬇ Export PDF</button>
+      </div>
+      <div class="tags">
+        <span class="tag">🤖 Google Gemini</span>
+        <span class="tag">⚡ Node.js + Express</span>
+        <span class="tag">🎨 HTML · CSS · JavaScript</span>
+        <span class="tag">🎓 Latihan Hacktiv8</span>
+      </div>
+    </header>
+
+    <main class="content">
+      <!-- 1. Tampilan -->
+      <section>
+        <h2><span class="num">1</span> Tampilan Game</h2>
+        <div class="grid-2">
+          <figure>
+            <img src="img/home.png" alt="Halaman awal Tebak Kata AI" />
+            <figcaption>🏠 Halaman awal: isi nama, pilih tema, lalu klik Mulai Bermain.</figcaption>
+          </figure>
+          <figure>
+            <img src="img/gameplay.png" alt="Halaman permainan Tebak Kata AI" />
+            <figcaption>🎮 Halaman permainan: kotak huruf, nilai, clue dari AI, dan chat diskusi.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <!-- 2. Teknologi AI -->
+      <section>
+        <h2><span class="num">2</span> Jenis AI &amp; Method LLM</h2>
+        <div class="grid-3">
+          <div class="card">
+            <div class="icon">🧠</div>
+            <h3>Model AI</h3>
+            <ul class="list">
+              <li>Google <b>Gemini</b> (LLM)</li>
+              <li>Model: <code>gemini-3.6-flash</code></li>
+              <li>Diatur lewat <code>GEMINI_MODEL</code> di <code>.env</code></li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="icon">📦</div>
+            <h3>SDK</h3>
+            <ul class="list">
+              <li>Library <code>@google/genai</code></li>
+              <li>API key dari <code>GEMINI_API_KEY</code></li>
+              <li>Key aman di server, tidak terlihat di browser</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="icon">💬</div>
+            <h3>Method</h3>
+            <ul class="list">
+              <li><code>ai.models.generateContent()</code></li>
+              <li>Percakapan <b>multi-turn</b> (role <code>user</code> &amp; <code>model</code>)</li>
+              <li>Riwayat chat dikirim ulang setiap bertanya</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. Koneksi API -->
+      <section>
+        <h2><span class="num">3</span> Koneksi ke API</h2>
+        <div class="flow">
+          <div class="step"><b>🌐 Browser</b>script.js · fetch()</div>
+          <div class="arrow">→</div>
+          <div class="step"><b>🖥️ Express</b>POST /api/chat</div>
+          <div class="arrow">→</div>
+          <div class="step"><b>🤖 Gemini</b>generateContent()</div>
+          <div class="arrow">→</div>
+          <div class="step"><b>📨 Respons</b>{ "text": "..." }</div>
+        </div>
+        <div class="grid-2">
+          <pre>POST http://localhost:3000/api/chat
+{
+  "messages": [
+    { "role": "user", "content": "..." },
+    { "role": "model", "content": "..." }
+  ],
+  "systemInstruction": "Peran AI...",
+  "temperature": 0.7
+}</pre>
+          <ul class="list">
+            <li>Satu endpoint untuk semua kebutuhan game</li>
+            <li>Peran AI dibedakan lewat <b>systemInstruction</b></li>
+            <li>CORS aktif, jadi halaman bisa dibuka lewat server maupun langsung sebagai file</li>
+            <li>Server juga menyajikan folder <code>public</code> (<code>express.static</code>)</li>
+            <li>Retry otomatis maksimal 2 kali jika Gemini sedang sibuk</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 4. Temperature -->
+      <section>
+        <h2><span class="num">4</span> Temperature</h2>
+        <div class="grid-3">
+          <div class="card temp">
+            <h3>🎲 Membuat Kata</h3>
+            <div class="value">1.0</div>
+            <div class="bar"><div style="width: 100%"></div></div>
+            <p>Lebih kreatif, supaya kata dan clue bervariasi tiap ronde.</p>
+          </div>
+          <div class="card temp">
+            <h3>💬 Teman Diskusi</h3>
+            <div class="value">0.7</div>
+            <div class="bar"><div style="width: 70%"></div></div>
+            <p>Seimbang: tetap ramah, tapi patuh aturan agar tidak membocorkan jawaban.</p>
+          </div>
+          <div class="card temp">
+            <h3>🏁 Komentar Akhir</h3>
+            <div class="value">0.8</div>
+            <div class="bar"><div style="width: 80%"></div></div>
+            <p>Hangat dan ekspresif untuk ucapan selamat atau penghiburan.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. System Instruction -->
+      <section class="page-break">
+        <h2><span class="num">5</span> System Instruction (Peran AI)</h2>
+        <div class="grid-3">
+          <div class="card">
+            <div class="icon">🎩</div>
+            <h3>Game Master</h3>
+            <ul class="list">
+              <li>Memilih 1 kata rahasia (4–10 huruf)</li>
+              <li>Membuat clue gaya teka-teki "Aku ..."</li>
+              <li>Membuat sapaan untuk pemain</li>
+              <li>Balasan wajib berformat <b>JSON</b></li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="icon">🤝</div>
+            <h3>Teman Diskusi</h3>
+            <ul class="list">
+              <li>Tahu kata rahasia &amp; data hurufnya</li>
+              <li>Dilarang menyebut atau mengeja jawaban</li>
+              <li>Maksimal 1 info huruf per jawaban</li>
+              <li>Singkat, santai, maksimal 3 kalimat</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="icon">🎤</div>
+            <h3>Pembawa Acara</h3>
+            <ul class="list">
+              <li>Ucapan selamat sesuai nilai</li>
+              <li>Satu fakta menarik tentang kata</li>
+              <li>Menghibur jika pemain menyerah</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. Alur -->
+      <section>
+        <h2><span class="num">6</span> Alur Permainan</h2>
+        <div class="steps">
+          <div><b>Masuk</b>Isi nama dan pilih tema: Otomotif, Umum Indonesia, Umum Internasional, atau Campuran.</div>
+          <div><b>AI Menyiapkan Kata</b>Gemini membuat kata, kategori, clue, dan sapaan dalam 1 request.</div>
+          <div><b>Baca Clue</b>Clue, kategori, dan jumlah huruf tampil di bawah kotak jawaban.</div>
+          <div><b>Diskusi</b>Tanya AI di chat, termasuk lewat tombol pertanyaan cepat.</div>
+          <div><b>Jawab</b>Isi kotak huruf lalu klik Jawab. Salah? AI memberi semangat.</div>
+          <div><b>Hasil</b>Nilai tampil, AI memberi komentar, lanjut ke kata berikutnya.</div>
+        </div>
+      </section>
+
+      <!-- 7. Aturan -->
+      <section>
+        <h2><span class="num">7</span> Aturan Nilai</h2>
+        <div class="grid-2">
+          <table>
+            <tr><th>Aksi</th><th>Nilai</th></tr>
+            <tr><td>Nilai awal setiap kata</td><td class="zero">100%</td></tr>
+            <tr><td>Bertanya ke AI</td><td class="minus">-10%</td></tr>
+            <tr><td>Tebakan salah</td><td class="minus">-5%</td></tr>
+            <tr><td>Buka 1 huruf</td><td class="minus">-15%</td></tr>
+            <tr><td>Menyerah</td><td class="minus">0%</td></tr>
+          </table>
+          <ul class="list">
+            <li>Semakin banyak bertanya, semakin kecil nilai</li>
+            <li>Nilai minimum jika berhasil menjawab: <b>1%</b></li>
+            <li>Warna bar: 🟢 ≥70% · 🟡 ≥40% · 🔴 di bawahnya</li>
+            <li>Rata-rata nilai semua ronde tampil di header</li>
+            <li>Gagal terhubung ke AI? Nilai <b>tidak</b> dikurangi</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 8. Request -->
+      <section>
+        <h2><span class="num">8</span> Pemakaian Request API</h2>
+        <div class="grid-2">
+          <table>
+            <tr><th>Aksi</th><th>Request</th></tr>
+            <tr><td>Buka halaman &amp; pilih tema</td><td>0</td></tr>
+            <tr><td>Mulai ronde (kata, clue, sapaan)</td><td>1</td></tr>
+            <tr><td>Setiap pertanyaan di chat</td><td>1</td></tr>
+            <tr><td>Reaksi tebakan salah</td><td>1</td></tr>
+            <tr><td>Komentar akhir ronde</td><td>1</td></tr>
+            <tr><td>Buka 1 huruf</td><td>0</td></tr>
+          </table>
+          <div>
+            <ul class="list">
+              <li>Contoh 1 ronde: 2 tanya + 1 salah + selesai ≈ <b>5 request</b></li>
+              <li>Jumlah huruf dihitung di browser, tanpa request</li>
+            </ul>
+            <div class="note">⚠️ Kuota gratis Gemini terbatas per model per hari. Jika habis, game menampilkan pesan untuk mengganti <code>GEMINI_MODEL</code> di <code>.env</code> lalu restart server.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 9. Tambahan -->
+      <section>
+        <h2><span class="num">9</span> Informasi Tambahan</h2>
+        <div class="grid-2">
+          <div class="card">
+            <h3>🛡️ Pengaman</h3>
+            <ul class="list">
+              <li>Jawaban yang bocor dari AI otomatis disamarkan jadi ■■■</li>
+              <li>Data huruf per posisi diberikan ke AI agar tidak salah hitung</li>
+              <li>Kata yang sudah dipakai tidak diulang di sesi yang sama</li>
+              <li>Tombol "Coba Lagi" jika AI gagal menyiapkan kata</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>🚀 Cara Menjalankan</h3>
+            <ul class="list">
+              <li>Isi <code>GEMINI_API_KEY</code> &amp; <code>GEMINI_MODEL</code> di <code>.env</code></li>
+              <li>Jalankan <code>npm start</code> di folder <code>gemini-chatbot-api</code></li>
+              <li>Buka <code>http://localhost:3000</code></li>
+              <li>Struktur: <code>index.js</code> + <code>public/</code> (html, css, js)</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>🧩 Tebak Kata AI · Latihan AI Chatbot Hacktiv8</span>
+      <span>Powered by Google Gemini</span>
+    </footer>
+  </div>
+</body>
+</html>
